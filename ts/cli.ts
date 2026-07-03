@@ -94,6 +94,11 @@ function fans(list: Metrics["fans"]): string {
     .join("   ");
 }
 
+function thermal(t: Metrics["thermal"]): string {
+  if (!t) return "—";
+  return t.throttling ? `${t.state} (throttling)` : t.state;
+}
+
 function render(m: Metrics): string {
   const soc = m.soc;
   return [
@@ -105,6 +110,7 @@ function render(m: Metrics): string {
     `  RAM   ${gib(m.memory.ramUsedBytes)} / ${gib(m.memory.ramTotalBytes)}   swap ${gib(m.memory.swapUsedBytes)} / ${gib(m.memory.swapTotalBytes)}   power ${num(m.memory.ramPowerWatts ?? null, " W")}`,
     `  ANE   power ${num(m.ane?.powerWatts ?? null, " W")}`,
     `  FAN   ${fans(m.fans)}`,
+    `  THRM  ${thermal(m.thermal)}`,
     `  ${m.timestamp}`,
   ].join("\n");
 }

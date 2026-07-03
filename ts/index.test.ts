@@ -46,6 +46,7 @@ function nativeMetrics(overrides: Partial<NativeMetrics> = {}): NativeMetrics {
     ramPowerWatts: 0,
     anePowerWatts: 0,
     fans: [],
+    thermalPressureLevel: 0,
     ...overrides,
   };
 }
@@ -164,6 +165,22 @@ describe("toMetrics", () => {
   it("emits an empty fans array on fanless Macs", () => {
     const m = toMetrics(nativeMetrics({ fans: [] }), SOC);
     expect(m.fans).toEqual([]);
+  });
+
+  it("maps thermal level 0 to nominal with throttling off", () => {
+    const m = toMetrics(nativeMetrics({ thermalPressureLevel: 0 }), SOC);
+    expect(m.thermal).toEqual({ level: 0, state: "nominal", throttling: false });
+  });
+
+  it("maps thermal level 2 to serious with throttling on", () => {
+    const m = toMetrics(nativeMetrics({ thermalPressureLevel: 2 }), SOC);
+    expect(m.thermal).toEqual({ level: 2, state: "serious", throttling: true });
+  });
+
+  it("clamps an unknown thermal level to nominal (throttling still reflects the raw level)", () => {
+    const m = toMetrics(nativeMetrics({ thermalPressureLevel: 9 }), SOC);
+    expect(m.thermal?.state).toBe("nominal");
+    expect(m.thermal?.level).toBe(9);
   });
 });
 

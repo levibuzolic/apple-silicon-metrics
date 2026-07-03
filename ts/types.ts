@@ -42,6 +42,21 @@ export interface AneMetrics {
   powerWatts: number | null;
 }
 
+/**
+ * Coarse OS-level thermal-*pressure* signal, read from
+ * `NSProcessInfo.thermalState`. This is the system-wide throttling hint macOS
+ * exposes to apps — *not* an IOReport hardware temperature/counter. It only ever
+ * takes four discrete levels.
+ */
+export interface ThermalMetrics {
+  /** Raw level: 0 nominal, 1 fair, 2 serious, 3 critical. */
+  level: number;
+  /** Human-readable name for {@link ThermalMetrics.level}. */
+  state: "nominal" | "fair" | "serious" | "critical";
+  /** `true` when the OS has begun throttling to shed heat (level `>= 1`). */
+  throttling: boolean;
+}
+
 export interface FanMetrics {
   /** Stable fan identifier derived from SMC fan order, e.g. `"fan0"`. */
   name: string;
@@ -61,6 +76,8 @@ export interface Metrics {
   ane?: AneMetrics;
   /** Per-fan speeds. Empty on fanless Macs (e.g. MacBook Air). */
   fans?: FanMetrics[];
+  /** Coarse OS thermal-pressure / throttling state. */
+  thermal?: ThermalMetrics;
 }
 
 export interface SampleOptions {

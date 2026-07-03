@@ -54,6 +54,10 @@ pub struct NativeMetrics {
     pub ane_power_watts: f64,
     // Fans (empty when none are reported)
     pub fans: Vec<NativeFan>,
+    // Coarse OS thermal-pressure level: 0 nominal, 1 fair, 2 serious, 3 critical.
+    // Not sourced from `macmon::Metrics`; the worker sets this after `From`
+    // (see `crate::thermal`). Defaults to 0.0 (nominal) here.
+    pub thermal_pressure_level: f64,
 }
 
 impl From<&macmon::SocInfo> for NativeSocInfo {
@@ -86,6 +90,9 @@ impl From<&macmon::Metrics> for NativeMetrics {
             ram_power_watts: m.ram_power as f64,
             ane_power_watts: m.ane_power as f64,
             fans: m.fans.iter().map(NativeFan::from).collect(),
+            // Placeholder; the worker overwrites this with the live OS thermal
+            // level, which is not carried by `macmon::Metrics`.
+            thermal_pressure_level: 0.0,
         }
     }
 }
@@ -153,6 +160,21 @@ mod tests {
     fn defaults_to_no_fans() {
         let dto = NativeMetrics::from(&macmon::Metrics::default());
         assert!(dto.fans.is_empty());
+    }
+
+    #[test]
+    fn thermal_level_defaults_to_nominal_and_is_settable() {
+        // `From` leaves the field at its nominal placeholder; the worker
+        // overwrites it with the live OS level.
+        let mut dto = NativeMetrics::from(&macmon::Metrics::default());
+        assert_eq!(dto.thermal_pressure_level, 0.0);
+
+        dto.thermal_pressure_level = crate::thermal::thermal_pressure_level();
+        assert!(
+            (0.0..=3.0).contains(&dto.thermal_pressure_level),
+            "thermal level out of range: {}",
+            dto.thermal_pressure_level
+        );
     }
 
     #[test]

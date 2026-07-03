@@ -9,6 +9,7 @@
 extern crate napi_derive;
 
 mod dto;
+mod thermal;
 mod worker;
 
 use std::sync::mpsc::{channel, Sender};

@@ -28,6 +28,7 @@ import type {
   Sampler,
   SamplerOptions,
   SocInfo,
+  ThermalMetrics,
 } from "./types.js";
 
 export type {
@@ -41,6 +42,7 @@ export type {
   Sampler,
   SamplerOptions,
   SocInfo,
+  ThermalMetrics,
 } from "./types.js";
 export { AppleSiliconMetricsError, isAppleSiliconMetricsError, type AppleSiliconMetricsErrorCode } from "./errors.js";
 
@@ -98,6 +100,17 @@ function mapFans(native: NativeMetrics["fans"]): FanMetrics[] {
   }));
 }
 
+/** OS thermal-pressure level → state name, indexed by level (0..3). */
+const THERMAL_STATES = ["nominal", "fair", "serious", "critical"] as const;
+
+/** Map the native thermal-pressure level to the public {@link ThermalMetrics}
+ * shape. Unknown/out-of-range levels clamp to `nominal`; `throttling` is `true`
+ * once the OS leaves the nominal level (level `>= 1`). */
+function mapThermal(level: number): ThermalMetrics {
+  const state = THERMAL_STATES[level] ?? "nominal";
+  return { level, state, throttling: level >= 1 };
+}
+
 function mapSoc(native: NativeSocInfo): SocInfo {
   return {
     chipName: native.chipName,
@@ -136,6 +149,7 @@ export function toMetrics(native: NativeMetrics, soc: SocInfo): Metrics {
       powerWatts: positiveOrNull(native.anePowerWatts),
     },
     fans: mapFans(native.fans),
+    thermal: mapThermal(native.thermalPressureLevel),
   };
 }
 
