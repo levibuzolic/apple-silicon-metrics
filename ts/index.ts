@@ -146,6 +146,8 @@ export function toMetrics(native: NativeMetrics, soc: SocInfo): Metrics {
       swapTotalBytes: native.swapTotalBytes,
       swapUsedBytes: native.swapUsedBytes,
       ramPowerWatts: positiveOrNull(native.ramPowerWatts),
+      readBandwidthGbps: positiveOrNull(native.memReadBandwidthGbps),
+      writeBandwidthGbps: positiveOrNull(native.memWriteBandwidthGbps),
     },
     ane: {
       powerWatts: positiveOrNull(native.anePowerWatts),
