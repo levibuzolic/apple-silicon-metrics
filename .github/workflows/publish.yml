@@ -22,9 +22,10 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # Trusted publishing needs Node >= 22.14; `npm stage` needs npm >= 11.15.
-  NODE_VERSION: "22"
-  NPM_VERSION: "11.15.0"
+  # Pinned to latest for reproducible, provenance-attested release builds.
+  # Floors: trusted publishing needs Node >= 22.14; `npm stage` needs npm >= 11.15.
+  NODE_VERSION: "26.4.0"
+  NPM_VERSION: "11.18.0"
 
 jobs:
   test:
