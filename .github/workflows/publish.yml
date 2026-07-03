@@ -1,0 +1,86 @@
+name: Release
+
+# Steady-state release pipeline. Triggered by publishing a GitHub Release.
+#
+# Security model (see README "Publishing"):
+#   - Trusted publishing (OIDC): no long-lived NPM_TOKEN secret.
+#   - Provenance: signed SLSA build attestation (public repo required).
+#   - Staged publishing: the version is uploaded to npm's staging queue and is
+#     NOT installable until a maintainer approves it with 2FA.
+#   - GitHub Environment "Publish": add required reviewers for a manual gate
+#     before the job can even run.
+#
+# NOTE: staged publishing cannot stage a brand-new package. The very first
+# version must be bootstrapped manually — see README.
+
+on:
+  release:
+    types: [published]
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  # Trusted publishing needs Node >= 22.14; `npm stage` needs npm >= 11.15.
+  NODE_VERSION: "22"
+  NPM_VERSION: "11.15.0"
+
+jobs:
+  test:
+    name: Test
+    # macos-14+ runners are Apple Silicon (arm64), required to build the addon.
+    runs-on: macos-14
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+      - uses: Swatinem/rust-cache@v2
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run test:rust
+      - run: pnpm run build
+      - run: pnpm run typecheck
+      - run: pnpm test
+
+  publish:
+    name: Stage on npm
+    needs: test
+    runs-on: macos-14
+    # Requires GitHub-hosted runners (self-hosted is unsupported for OIDC).
+    environment: Publish
+    permissions:
+      contents: read
+      id-token: write # OIDC: trusted publishing + provenance
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+      - uses: Swatinem/rust-cache@v2
+      - name: Upgrade npm to a staging-capable version
+        run: npm install --global npm@${{ env.NPM_VERSION }}
+      - name: Verify release toolchain
+        run: |
+          node --version
+          npm --version
+          npm stage --help
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build native addon + TypeScript
+        run: pnpm run build
+      - name: Stage release on npm (with provenance)
+        run: npm stage publish --provenance

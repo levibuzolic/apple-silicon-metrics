@@ -59,6 +59,9 @@
     "README.md",
     "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "napi": {
     "binaryName": "asmon",
     "targets": [
