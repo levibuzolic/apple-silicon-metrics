@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    # macos-14+ runners are Apple Silicon (arm64), required for the sensor APIs.
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Rust tests
+        run: pnpm run test:rust
+
+      - name: Build native addon
+        run: pnpm run build:native
+
+      - name: Build TypeScript
+        run: pnpm run build:ts
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Test (unit + integration)
+        run: pnpm test
