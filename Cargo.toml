@@ -1,6 +1,6 @@
 [package]
 name = "apple-silicon-metrics"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 license = "MIT"
 description = "Native N-API bindings exposing Apple Silicon hardware metrics via the macmon crate"
