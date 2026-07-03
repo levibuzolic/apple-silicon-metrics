@@ -19,12 +19,16 @@ export interface SocInfo {
 export interface CpuMetrics {
   /** Combined E+P core utilization, weighted by core count. `0..1`. */
   usageRatio: number | null;
+  /** Active residency ratio (not frequency-scaled), 0..1. */
+  activeRatio: number | null;
   powerWatts: number | null;
   tempCelsius: number | null;
 }
 
 export interface GpuMetrics {
   usageRatio: number | null;
+  /** Active residency ratio (not frequency-scaled), 0..1. */
+  activeRatio: number | null;
   frequencyMhz: number | null;
   powerWatts: number | null;
   tempCelsius: number | null;

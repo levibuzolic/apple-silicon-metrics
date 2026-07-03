@@ -33,9 +33,11 @@ const SOC: NativeSocInfo = {
 function nativeMetrics(overrides: Partial<NativeMetrics> = {}): NativeMetrics {
   return {
     cpuUsageRatio: 0.25,
+    cpuActiveRatio: 0.2,
     cpuPowerWatts: 3,
     cpuTempCelsius: 55,
     gpuUsageRatio: 0.4,
+    gpuActiveRatio: 0.35,
     gpuFreqMhz: 1200,
     gpuPowerWatts: 5,
     gpuTempCelsius: 0,
@@ -117,8 +119,11 @@ describe("toMetrics", () => {
     });
 
     expect(m.cpu.usageRatio).toBe(0.25);
+    expect(m.cpu.activeRatio).toBe(0.2);
     expect(m.cpu.powerWatts).toBe(3);
     expect(m.cpu.tempCelsius).toBe(55);
+    expect(m.gpu.usageRatio).toBe(0.4);
+    expect(m.gpu.activeRatio).toBe(0.35);
     expect(m.gpu.frequencyMhz).toBe(1200);
     expect(m.memory.ramTotalBytes).toBe(51_539_607_552);
     expect(m.soc?.chipName).toBe("Apple M4 Pro");

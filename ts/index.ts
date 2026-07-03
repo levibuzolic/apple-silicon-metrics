@@ -129,11 +129,13 @@ export function toMetrics(native: NativeMetrics, soc: SocInfo): Metrics {
     soc,
     cpu: {
       usageRatio: native.cpuUsageRatio,
+      activeRatio: native.cpuActiveRatio,
       powerWatts: native.cpuPowerWatts,
       tempCelsius: positiveOrNull(native.cpuTempCelsius),
     },
     gpu: {
       usageRatio: native.gpuUsageRatio,
+      activeRatio: native.gpuActiveRatio,
       frequencyMhz: positiveOrNull(native.gpuFreqMhz),
       powerWatts: native.gpuPowerWatts,
       tempCelsius: positiveOrNull(native.gpuTempCelsius),
