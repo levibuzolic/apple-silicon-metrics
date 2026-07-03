@@ -10,6 +10,7 @@
 use std::sync::mpsc::{channel, Receiver, Sender};
 
 use crate::dto::{NativeMetrics, NativeSocInfo};
+use crate::membw::MemBandwidth;
 
 /// A request sent to the sampler worker thread.
 pub enum Cmd {
@@ -76,10 +77,20 @@ fn run(cmd_rx: Receiver<Cmd>, init_tx: Sender<Result<NativeSocInfo, String>>) {
     }
     drop(init_tx);
 
+    // Dedicated IOReport reader for DRAM bandwidth. Owns CoreFoundation pointers
+    // and is not thread-safe, so it is pinned here alongside `macmon::Sampler`.
+    // Construction never fails; where the channels are unavailable (or not
+    // sudo-lessly sampleable) it reports 0.0.
+    let mut membw = MemBandwidth::new();
+
     // Ends when every `cmd_tx` clone (handle + any in-flight tasks) is dropped.
     for cmd in cmd_rx {
         match cmd {
             Cmd::Sample { duration_ms, resp } => {
+                // Baseline the bandwidth counters immediately before macmon's
+                // interval sleep so the delta covers the same window, then read
+                // after `get_metrics` returns.
+                membw.begin();
                 let result = sampler
                     .get_metrics(duration_ms)
                     .map(|m| {
@@ -88,6 +99,9 @@ fn run(cmd_rx: Receiver<Cmd>, init_tx: Sender<Result<NativeSocInfo, String>>) {
                         // thermal-pressure level here on the worker thread.
                         dto.thermal_pressure_level =
                             crate::thermal::thermal_pressure_level();
+                        let (read_gbps, write_gbps) = membw.read();
+                        dto.mem_read_bandwidth_gbps = read_gbps;
+                        dto.mem_write_bandwidth_gbps = write_gbps;
                         dto
                     })
                     .map_err(|e| format!("{e}"));

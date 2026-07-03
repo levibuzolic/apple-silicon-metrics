@@ -40,6 +40,10 @@ export interface MemoryMetrics {
   swapTotalBytes: number;
   swapUsedBytes: number;
   ramPowerWatts?: number | null;
+  /** DRAM bandwidth in GB/s over the sample window; null when unavailable on this SoC. */
+  readBandwidthGbps?: number | null;
+  /** DRAM bandwidth in GB/s over the sample window; null when unavailable on this SoC. */
+  writeBandwidthGbps?: number | null;
 }
 
 export interface AneMetrics {

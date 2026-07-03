@@ -107,7 +107,7 @@ function render(m: Metrics): string {
       : "(SoC info unavailable)",
     `  CPU   usage ${ratio(m.cpu.usageRatio)}   active ${ratio(m.cpu.activeRatio)}   power ${num(m.cpu.powerWatts, " W")}   temp ${num(m.cpu.tempCelsius, "°C")}`,
     `  GPU   usage ${ratio(m.gpu.usageRatio)}   active ${ratio(m.gpu.activeRatio)}   power ${num(m.gpu.powerWatts, " W")}   temp ${num(m.gpu.tempCelsius, "°C")}   freq ${num(m.gpu.frequencyMhz, " MHz", 0)}`,
-    `  RAM   ${gib(m.memory.ramUsedBytes)} / ${gib(m.memory.ramTotalBytes)}   swap ${gib(m.memory.swapUsedBytes)} / ${gib(m.memory.swapTotalBytes)}   power ${num(m.memory.ramPowerWatts ?? null, " W")}`,
+    `  RAM   ${gib(m.memory.ramUsedBytes)} / ${gib(m.memory.ramTotalBytes)}   swap ${gib(m.memory.swapUsedBytes)} / ${gib(m.memory.swapTotalBytes)}   power ${num(m.memory.ramPowerWatts ?? null, " W")}   bw ${num(m.memory.readBandwidthGbps ?? null, "")}/${num(m.memory.writeBandwidthGbps ?? null, " GB/s")}`,
     `  ANE   power ${num(m.ane?.powerWatts ?? null, " W")}`,
     `  FAN   ${fans(m.fans)}`,
     `  THRM  ${thermal(m.thermal)}`,

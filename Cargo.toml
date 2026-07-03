@@ -19,6 +19,10 @@ napi-derive = "3"
 macmon = { git = "https://github.com/vladkens/macmon.git", rev = "337350e18a46e41a060c6c3f9d75793568e16873" }
 # Coarse OS-level thermal-pressure signal via NSProcessInfo.thermalState.
 objc2-foundation = { version = "0.3", default-features = false, features = ["std", "NSProcessInfo"] }
+# Used by `src/membw.rs` for its dedicated IOReport subscription (DRAM
+# memory-bandwidth counters). Pinned to match macmon's transitive version so the
+# lockfile resolves to a single copy.
+core-foundation = "0.10.1"
 
 [build-dependencies]
 napi-build = "2"
