@@ -25,5 +25,5 @@
     "sourceMap": true,
     "noEmit": true
   },
-  "include": ["ts", "tsdown.config.ts", "vitest.config.ts"]
+  "include": ["ts", "scripts", "tsdown.config.ts", "vitest.config.ts"]
 }

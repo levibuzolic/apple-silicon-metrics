@@ -76,7 +76,7 @@ flowchart TD
 
 ### Components
 
-**1. `ts/pkg-size.ts`** (pure, testable — lives in `ts/` so it's typechecked and vitest-tested like the rest of the source; runs directly via Node 26 type-stripping, no build step)
+**1. `scripts/pkg-size.ts`** (pure, testable — lives in `scripts/`, a directory for tooling that doesn't ship in the package but is still typechecked (`tsconfig.json` `include`) and vitest-tested (`vitest.config.ts` `include`); runs directly via Node 26 type-stripping, no build step)
 - Input: paths to two `npm pack --dry-run --json` outputs (base, head). Either
   may be absent (e.g. base build failed / new package) — handled as zero.
 - Logic: parse → classify each file → sum per bucket → compute deltas → format
@@ -112,9 +112,9 @@ flowchart TD
      the security posture of `publish.yml`): read `comment.md`, find an existing
      comment containing the marker, update it if present else create it.
 
-  The report is invoked as `node head/ts/pkg-size.ts base.json head.json`.
+  The report is invoked as `node head/scripts/pkg-size.ts base.json head.json`.
 
-**3. `ts/pkg-size.test.ts`** (vitest, matching repo convention)
+**3. `scripts/pkg-size.test.ts`** (vitest, matching repo convention)
 - Fixture JSON blobs (small hand-written `npm pack` shapes) → assert bucket sums,
   delta signs, byte formatting, new-file/removed-file edge cases, and
   missing-baseline behavior.
