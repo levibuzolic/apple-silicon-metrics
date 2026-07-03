@@ -926,9 +926,8 @@ dependencies = [
 
 [[package]]
 name = "macmon"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f5c39c83f05d6ebe9eb6c8ea95db95279bb085124bf244d3383e9c7b0abd2465"
+version = "0.7.2"
+source = "git+https://github.com/vladkens/macmon.git?rev=337350e18a46e41a060c6c3f9d75793568e16873#337350e18a46e41a060c6c3f9d75793568e16873"
 dependencies = [
  "chrono",
  "clap",

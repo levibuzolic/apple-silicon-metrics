@@ -87,6 +87,13 @@ function gib(bytes: number): string {
   return `${(bytes / 1024 ** 3).toFixed(1)} GiB`;
 }
 
+function fans(list: Metrics["fans"]): string {
+  if (!list || list.length === 0) return "—";
+  return list
+    .map((f) => (f.maxRpm != null ? `${f.name} ${f.rpm}/${f.maxRpm} rpm` : `${f.name} ${f.rpm} rpm`))
+    .join("   ");
+}
+
 function render(m: Metrics): string {
   const soc = m.soc;
   return [
@@ -97,6 +104,7 @@ function render(m: Metrics): string {
     `  GPU   usage ${ratio(m.gpu.usageRatio)}   power ${num(m.gpu.powerWatts, " W")}   temp ${num(m.gpu.tempCelsius, "°C")}   freq ${num(m.gpu.frequencyMhz, " MHz", 0)}`,
     `  RAM   ${gib(m.memory.ramUsedBytes)} / ${gib(m.memory.ramTotalBytes)}   swap ${gib(m.memory.swapUsedBytes)} / ${gib(m.memory.swapTotalBytes)}   power ${num(m.memory.ramPowerWatts ?? null, " W")}`,
     `  ANE   power ${num(m.ane?.powerWatts ?? null, " W")}`,
+    `  FAN   ${fans(m.fans)}`,
     `  ${m.timestamp}`,
   ].join("\n");
 }

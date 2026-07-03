@@ -19,16 +19,12 @@ export interface SocInfo {
 export interface CpuMetrics {
   /** Combined E+P core utilization, weighted by core count. `0..1`. */
   usageRatio: number | null;
-  /** Reserved: macmon does not distinguish an active-vs-usage ratio. Always `null`. */
-  activeRatio: number | null;
   powerWatts: number | null;
   tempCelsius: number | null;
 }
 
 export interface GpuMetrics {
   usageRatio: number | null;
-  /** Reserved: macmon does not distinguish an active-vs-usage ratio. Always `null`. */
-  activeRatio: number | null;
   frequencyMhz: number | null;
   powerWatts: number | null;
   tempCelsius: number | null;
@@ -47,8 +43,11 @@ export interface AneMetrics {
 }
 
 export interface FanMetrics {
+  /** Stable fan identifier derived from SMC fan order, e.g. `"fan0"`. */
   name: string;
+  /** Current fan speed in revolutions per minute. */
   rpm: number;
+  /** Maximum fan speed in RPM, or `null` when SMC does not report one. */
   maxRpm?: number | null;
 }
 
@@ -60,7 +59,7 @@ export interface Metrics {
   gpu: GpuMetrics;
   memory: MemoryMetrics;
   ane?: AneMetrics;
-  /** Reserved for a future release; macmon 0.7.0 exposes no fan RPM data. */
+  /** Per-fan speeds. Empty on fanless Macs (e.g. MacBook Air). */
   fans?: FanMetrics[];
 }
 

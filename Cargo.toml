@@ -13,7 +13,10 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 napi = { version = "3", features = ["napi8"] }
 napi-derive = "3"
-macmon = "0.7.0"
+# Pinned to a git rev: fan RPM metrics (Metrics.fans) landed on main after the
+# 0.7.0 crates.io release and are not in any published version. Revisit when a
+# crate release includes fans.
+macmon = { git = "https://github.com/vladkens/macmon.git", rev = "337350e18a46e41a060c6c3f9d75793568e16873" }
 
 [build-dependencies]
 napi-build = "2"

@@ -3,7 +3,7 @@
 Sudo-less Apple Silicon hardware metrics for Node.js & TypeScript. Native N-API
 bindings around the Rust [`macmon`](https://crates.io/crates/macmon) crate: GPU
 utilization / frequency / power, CPU usage / power, RAM & swap, CPU/GPU
-temperature, and ANE power — no `sudo`, no spawning subprocesses.
+temperature, fan RPM, and ANE power — no `sudo`, no spawning subprocesses.
 
 > **Platform:** macOS on Apple Silicon (`darwin-arm64`) only. Every other
 > platform throws a typed error rather than returning fake data.
@@ -60,10 +60,11 @@ sampleOnce({ intervalMs: 500 }).then(console.log);
     "ecpuCores": 4,
     "pcpuCores": 10
   },
-  "cpu": { "usageRatio": 0.24, "activeRatio": null, "powerWatts": 3.16, "tempCelsius": 61.3 },
-  "gpu": { "usageRatio": 1, "activeRatio": null, "frequencyMhz": 1578, "powerWatts": 34.49, "tempCelsius": 87.1 },
+  "cpu": { "usageRatio": 0.24, "powerWatts": 3.16, "tempCelsius": 61.3 },
+  "gpu": { "usageRatio": 1, "frequencyMhz": 1578, "powerWatts": 34.49, "tempCelsius": 87.1 },
   "memory": { "ramTotalBytes": 51539607552, "ramUsedBytes": 41494380544, "swapTotalBytes": 10737418240, "swapUsedBytes": 9884270592, "ramPowerWatts": 2.66 },
-  "ane": { "powerWatts": null }
+  "ane": { "powerWatts": null },
+  "fans": [{ "name": "fan0", "rpm": 1980, "maxRpm": 7826 }, { "name": "fan1", "rpm": 2010, "maxRpm": 7826 }]
 }
 ```
 
@@ -84,6 +85,7 @@ Apple M4 Pro  ·  Mac16,8  ·  48 GB  ·  20 GPU cores  ·  4E+10P
   GPU   usage 12.4%   power 0.7 W   temp 41.5°C   freq 398 MHz
   RAM   17.5 GiB / 48.0 GiB   swap 2.6 GiB / 4.0 GiB   power 0.9 W
   ANE   power —
+  FAN   fan0 1980/7826 rpm   fan1 2010/7826 rpm
   2026-07-03T05:37:34.386Z
 ```
 
@@ -146,73 +148,17 @@ thread-safe, `apple-silicon-metrics` pins it to a single dedicated OS thread and
 drives it over channels. Each `sample()` runs the blocking read on libuv's
 threadpool, so Node's event loop is never blocked while the sample window elapses.
 
-## Building from source
+## Contributing
 
-Requires Rust (stable) and pnpm.
-
-```sh
-pnpm install
-pnpm run build        # build:native (napi) + build:ts (tsdown)
-pnpm run test:rust    # Rust DTO tests
-pnpm test             # JS unit + hardware integration tests
-pnpm demo             # print a live metrics snapshot (add --watch to refresh)
-```
-
-## Publishing
-
-Releases use the most hardened npm setup available, layering four independent
-controls:
-
-1. **Trusted publishing (OIDC)** — CI authenticates to npm via GitHub's OIDC, so
-   there is **no long-lived `NPM_TOKEN`** secret to leak.
-2. **Provenance** — a signed SLSA build attestation links each tarball to the
-   exact workflow run (requires a public repo).
-3. **Staged publishing** — CI runs `npm stage publish`, which uploads the version
-   to npm's staging queue. It is **not installable** until a maintainer approves
-   it with 2FA (`npm stage approve <id>` or the npmjs.com UI).
-4. **GitHub Environment gate** — the `Publish` environment can require a human
-   reviewer before the publish job runs at all.
-
-### One-time bootstrap (first version only)
-
-Trusted publishing can't be configured until a package exists, and staged
-publishing can't stage a brand-new package — so `0.1.0` is published manually:
-
-```sh
-npm login                     # with 2FA enabled
-pnpm run build                # produce dist/ + native/*.node
-npm publish                   # unscoped → public by default
-```
-
-Then, on npmjs.com → **apple-silicon-metrics → Settings → Trusted Publisher**, add:
-
-- Provider: **GitHub Actions**
-- Organization/user: `levibuzolic`, Repository: `apple-silicon-metrics`
-- Workflow filename: `publish.yml`
-- Environment: `Publish`
-- Allowed action: **`npm stage publish`**
-
-Finally, in GitHub → **Settings → Environments → `Publish`**, add yourself as a
-**required reviewer** (optional but recommended).
-
-### Steady-state releases (every version after)
-
-1. Bump the version and push a tag.
-2. Publish a **GitHub Release** — this triggers `.github/workflows/publish.yml`.
-3. CI runs tests, then `npm stage publish --provenance` (no token, no 2FA).
-4. Review and **approve** the staged version with 2FA to make it live.
-
-Requirements (enforced by the workflow): npm ≥ 11.15.0, Node ≥ 22.14.0,
-GitHub-hosted runners only.
+Building from source and running the tests is documented in
+[CONTRIBUTING.md](./CONTRIBUTING.md); the release process lives in
+[RELEASING.md](./RELEASING.md).
 
 ## Limitations
 
 - macOS Apple Silicon only; relies on private, undocumented macOS APIs that can
   change between OS releases.
-- Fan RPM is not yet exposed (`macmon` 0.7.0 has no fan API); the `fans` field
-  is reserved for a future release.
-- `cpu.activeRatio` / `gpu.activeRatio` are always `null` — `macmon` does not
-  distinguish an active-vs-usage ratio.
+- Fanless Macs (e.g. MacBook Air) report an empty `fans` array.
 
 ## License
 

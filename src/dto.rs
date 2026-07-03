@@ -20,6 +20,16 @@ pub struct NativeSocInfo {
     pub pcpu_cores: f64,
 }
 
+/// A single fan's speed metrics. `max_rpm` is `None` when SMC does not report a
+/// maximum for that fan.
+#[napi(object)]
+#[derive(Debug, Clone)]
+pub struct NativeFan {
+    pub name: String,
+    pub rpm: f64,
+    pub max_rpm: Option<f64>,
+}
+
 /// A single dynamic metrics sample. Flat by design; the TS layer reshapes this
 /// into the nested public `Metrics` type and applies null-normalization.
 #[napi(object)]
@@ -42,6 +52,8 @@ pub struct NativeMetrics {
     pub ram_power_watts: f64,
     // ANE
     pub ane_power_watts: f64,
+    // Fans (empty when none are reported)
+    pub fans: Vec<NativeFan>,
 }
 
 impl From<&macmon::SocInfo> for NativeSocInfo {
@@ -73,6 +85,17 @@ impl From<&macmon::Metrics> for NativeMetrics {
             swap_used_bytes: m.memory.swap_usage as f64,
             ram_power_watts: m.ram_power as f64,
             ane_power_watts: m.ane_power as f64,
+            fans: m.fans.iter().map(NativeFan::from).collect(),
+        }
+    }
+}
+
+impl From<&macmon::FanMetric> for NativeFan {
+    fn from(f: &macmon::FanMetric) -> Self {
+        Self {
+            name: f.name.clone(),
+            rpm: f.rpm as f64,
+            max_rpm: f.max_rpm.map(|v| v as f64),
         }
     }
 }
@@ -109,6 +132,27 @@ mod tests {
         assert_eq!(dto.gpu_temp_celsius, 0.0); // stays raw; TS normalizes to null
         assert_eq!(dto.ram_total_bytes, 17_179_869_184.0);
         assert_eq!(dto.ram_used_bytes, 8_589_934_592.0);
+    }
+
+    #[test]
+    fn maps_fans() {
+        let mut m = macmon::Metrics::default();
+        m.fans = vec![
+            macmon::FanMetric { name: "fan0".into(), rpm: 999, max_rpm: Some(4900) },
+            macmon::FanMetric { name: "fan1".into(), rpm: 1200, max_rpm: None },
+        ];
+        let dto = NativeMetrics::from(&m);
+        assert_eq!(dto.fans.len(), 2);
+        assert_eq!(dto.fans[0].name, "fan0");
+        assert_eq!(dto.fans[0].rpm, 999.0);
+        assert_eq!(dto.fans[0].max_rpm, Some(4900.0));
+        assert_eq!(dto.fans[1].max_rpm, None);
+    }
+
+    #[test]
+    fn defaults_to_no_fans() {
+        let dto = NativeMetrics::from(&macmon::Metrics::default());
+        assert!(dto.fans.is_empty());
     }
 
     #[test]

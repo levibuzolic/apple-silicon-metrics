@@ -22,6 +22,7 @@ import {
 } from "./binding.js";
 import { AppleSiliconMetricsError } from "./errors.js";
 import type {
+  FanMetrics,
   Metrics,
   SampleOptions,
   Sampler,
@@ -87,6 +88,16 @@ function positiveOrNull(value: number): number | null {
   return value > 0 ? value : null;
 }
 
+/** Map native fan DTOs to the public shape. `rpm` is always present; `maxRpm`
+ * is `null` when SMC does not report a maximum for that fan. */
+function mapFans(native: NativeMetrics["fans"]): FanMetrics[] {
+  return native.map((fan) => ({
+    name: fan.name,
+    rpm: fan.rpm,
+    maxRpm: fan.maxRpm ?? null,
+  }));
+}
+
 function mapSoc(native: NativeSocInfo): SocInfo {
   return {
     chipName: native.chipName,
@@ -105,13 +116,11 @@ export function toMetrics(native: NativeMetrics, soc: SocInfo): Metrics {
     soc,
     cpu: {
       usageRatio: native.cpuUsageRatio,
-      activeRatio: null,
       powerWatts: native.cpuPowerWatts,
       tempCelsius: positiveOrNull(native.cpuTempCelsius),
     },
     gpu: {
       usageRatio: native.gpuUsageRatio,
-      activeRatio: null,
       frequencyMhz: positiveOrNull(native.gpuFreqMhz),
       powerWatts: native.gpuPowerWatts,
       tempCelsius: positiveOrNull(native.gpuTempCelsius),
@@ -126,6 +135,7 @@ export function toMetrics(native: NativeMetrics, soc: SocInfo): Metrics {
     ane: {
       powerWatts: positiveOrNull(native.anePowerWatts),
     },
+    fans: mapFans(native.fans),
   };
 }
 

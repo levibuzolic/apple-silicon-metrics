@@ -45,6 +45,7 @@ function nativeMetrics(overrides: Partial<NativeMetrics> = {}): NativeMetrics {
     swapUsedBytes: 0,
     ramPowerWatts: 0,
     anePowerWatts: 0,
+    fans: [],
     ...overrides,
   };
 }
@@ -143,10 +144,26 @@ describe("toMetrics", () => {
     expect(m.memory.ramPowerWatts).toBeNull();
   });
 
-  it("marks activeRatio as null (not distinguished by macmon)", () => {
-    const m = toMetrics(nativeMetrics(), SOC);
-    expect(m.cpu.activeRatio).toBeNull();
-    expect(m.gpu.activeRatio).toBeNull();
+  it("maps fans, normalizing a missing maxRpm to null", () => {
+    const m = toMetrics(
+      nativeMetrics({
+        fans: [
+          { name: "fan0", rpm: 999, maxRpm: 4900 },
+          { name: "fan1", rpm: 1200, maxRpm: null },
+        ],
+      }),
+      SOC,
+    );
+
+    expect(m.fans).toEqual([
+      { name: "fan0", rpm: 999, maxRpm: 4900 },
+      { name: "fan1", rpm: 1200, maxRpm: null },
+    ]);
+  });
+
+  it("emits an empty fans array on fanless Macs", () => {
+    const m = toMetrics(nativeMetrics({ fans: [] }), SOC);
+    expect(m.fans).toEqual([]);
   });
 });
 
