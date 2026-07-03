@@ -9,7 +9,23 @@ import { describe, expect, it } from "vitest";
 
 import { createSampler, isSupported, sampleOnce } from "./index.js";
 
-const onHardware = isSupported() ? describe : describe.skip;
+/**
+ * True only when the native sensors can actually be initialized — i.e. Apple
+ * Silicon *and* readable IOReport/SMC channels. GitHub's virtualized macOS
+ * arm64 runners are `darwin-arm64` but expose no sensors, so `isSupported()`
+ * (platform + arch) is not enough to decide whether to run the hardware suite.
+ */
+function sensorsReadable(): boolean {
+  if (!isSupported()) return false;
+  try {
+    createSampler({ intervalMs: 50 }).close();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+const onHardware = sensorsReadable() ? describe : describe.skip;
 
 onHardware("integration (darwin-arm64)", () => {
   it("reports isSupported() === true", () => {

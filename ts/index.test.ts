@@ -149,7 +149,7 @@ describe("toMetrics", () => {
       nativeMetrics({
         fans: [
           { name: "fan0", rpm: 999, maxRpm: 4900 },
-          { name: "fan1", rpm: 1200, maxRpm: null },
+          { name: "fan1", rpm: 1200 }, // maxRpm absent → normalized to null
         ],
       }),
       SOC,

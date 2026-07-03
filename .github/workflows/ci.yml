@@ -12,7 +12,10 @@ concurrency:
 
 jobs:
   build-test:
-    # macos-14+ runners are Apple Silicon (arm64), required for the sensor APIs.
+    # macos-14+ runners are Apple Silicon (arm64), needed to build the native
+    # aarch64 addon. Note: these runners are virtualized and expose no readable
+    # IOReport/SMC sensors, so the hardware integration suite self-skips here
+    # (see ts/integration.test.ts) and is exercised on real hardware locally.
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
