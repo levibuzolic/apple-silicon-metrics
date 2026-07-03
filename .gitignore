@@ -147,5 +147,5 @@ vite.config.ts.timestamp-*
 *.node
 
 # Generated napi binding (built by `napi build`)
-/native/index.js
-/native/index.d.ts
+/native/index.cjs
+/native/index.d.cts

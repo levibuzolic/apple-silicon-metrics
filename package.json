@@ -1,0 +1,80 @@
+{
+  "name": "asmon",
+  "version": "0.1.0",
+  "description": "Sudo-less Apple Silicon hardware metrics (CPU/GPU/RAM, temperature, power) for Node & TypeScript, backed by the Rust macmon crate.",
+  "type": "module",
+  "license": "MIT",
+  "author": "levibuzolic",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/levibuzolic/asmon.git"
+  },
+  "homepage": "https://github.com/levibuzolic/asmon#readme",
+  "bugs": "https://github.com/levibuzolic/asmon/issues",
+  "keywords": [
+    "apple-silicon",
+    "macmon",
+    "macos",
+    "metrics",
+    "monitoring",
+    "cpu",
+    "gpu",
+    "temperature",
+    "power",
+    "napi",
+    "m1",
+    "m2",
+    "m3",
+    "m4"
+  ],
+  "os": [
+    "darwin"
+  ],
+  "cpu": [
+    "arm64"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@11.9.0",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "native",
+    "README.md",
+    "LICENSE"
+  ],
+  "napi": {
+    "binaryName": "asmon",
+    "targets": [
+      "aarch64-apple-darwin"
+    ]
+  },
+  "scripts": {
+    "build:native": "napi build --platform --release --output-dir native --js index.cjs --dts index.d.cts --manifest-path Cargo.toml",
+    "build:native:debug": "napi build --platform --output-dir native --js index.cjs --dts index.d.cts --manifest-path Cargo.toml",
+    "build:ts": "tsdown",
+    "build": "pnpm run build:native && pnpm run build:ts",
+    "typecheck": "tsc --noEmit",
+    "test:rust": "cargo test",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "pnpm run build"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^3.7.2",
+    "tsdown": "^0.22.3",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  }
+}
