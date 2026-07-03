@@ -76,7 +76,7 @@
     "build:native:debug": "napi build --platform --output-dir native --js index.cjs --dts index.d.cts --manifest-path Cargo.toml",
     "build:ts": "tsdown",
     "build": "pnpm run build:native && pnpm run build:ts",
-    "demo": "pnpm run build && node examples/demo.ts",
+    "demo": "pnpm run build && node dist/cli.mjs",
     "typecheck": "tsc --noEmit",
     "test:rust": "cargo test",
     "test": "vitest run",
