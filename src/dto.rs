@@ -37,10 +37,12 @@ pub struct NativeFan {
 pub struct NativeMetrics {
     // CPU
     pub cpu_usage_ratio: f64,
+    pub cpu_active_ratio: f64,
     pub cpu_power_watts: f64,
     pub cpu_temp_celsius: f64,
     // GPU
     pub gpu_usage_ratio: f64,
+    pub gpu_active_ratio: f64,
     pub gpu_freq_mhz: f64,
     pub gpu_power_watts: f64,
     pub gpu_temp_celsius: f64,
@@ -54,6 +56,10 @@ pub struct NativeMetrics {
     pub ane_power_watts: f64,
     // Fans (empty when none are reported)
     pub fans: Vec<NativeFan>,
+    // Coarse OS thermal-pressure level: 0 nominal, 1 fair, 2 serious, 3 critical.
+    // Not sourced from `macmon::Metrics`; the worker sets this after `From`
+    // (see `crate::thermal`). Defaults to 0.0 (nominal) here.
+    pub thermal_pressure_level: f64,
 }
 
 impl From<&macmon::SocInfo> for NativeSocInfo {
@@ -73,9 +79,11 @@ impl From<&macmon::Metrics> for NativeMetrics {
     fn from(m: &macmon::Metrics) -> Self {
         Self {
             cpu_usage_ratio: m.cpu_usage_pct as f64,
+            cpu_active_ratio: m.cpu_active_ratio as f64,
             cpu_power_watts: m.cpu_power as f64,
             cpu_temp_celsius: m.temp.cpu_temp_avg as f64,
             gpu_usage_ratio: m.gpu_usage.1 as f64,
+            gpu_active_ratio: m.gpu_active_ratio as f64,
             gpu_freq_mhz: m.gpu_usage.0 as f64,
             gpu_power_watts: m.gpu_power as f64,
             gpu_temp_celsius: m.temp.gpu_temp_avg as f64,
@@ -86,6 +94,9 @@ impl From<&macmon::Metrics> for NativeMetrics {
             ram_power_watts: m.ram_power as f64,
             ane_power_watts: m.ane_power as f64,
             fans: m.fans.iter().map(NativeFan::from).collect(),
+            // Placeholder; the worker overwrites this with the live OS thermal
+            // level, which is not carried by `macmon::Metrics`.
+            thermal_pressure_level: 0.0,
         }
     }
 }
@@ -107,9 +118,11 @@ mod tests {
     fn sample_metrics() -> macmon::Metrics {
         let mut m = macmon::Metrics::default();
         m.cpu_usage_pct = 0.42;
+        m.cpu_active_ratio = 0.37;
         m.cpu_power = 3.5;
         m.temp.cpu_temp_avg = 55.0;
         m.gpu_usage = (1200, 0.30);
+        m.gpu_active_ratio = 0.28;
         m.gpu_power = 2.0;
         m.temp.gpu_temp_avg = 0.0; // unavailable sensor
         m.memory.ram_total = 17_179_869_184; // 16 GiB
@@ -125,9 +138,11 @@ mod tests {
     fn maps_metrics_fields() {
         let dto = NativeMetrics::from(&sample_metrics());
         assert_eq!(dto.cpu_usage_ratio, 0.42_f32 as f64);
+        assert_eq!(dto.cpu_active_ratio, 0.37_f32 as f64);
         assert_eq!(dto.cpu_power_watts, 3.5_f32 as f64);
         assert_eq!(dto.cpu_temp_celsius, 55.0);
         assert_eq!(dto.gpu_usage_ratio, 0.30_f32 as f64);
+        assert_eq!(dto.gpu_active_ratio, 0.28_f32 as f64);
         assert_eq!(dto.gpu_freq_mhz, 1200.0);
         assert_eq!(dto.gpu_temp_celsius, 0.0); // stays raw; TS normalizes to null
         assert_eq!(dto.ram_total_bytes, 17_179_869_184.0);
@@ -153,6 +168,21 @@ mod tests {
     fn defaults_to_no_fans() {
         let dto = NativeMetrics::from(&macmon::Metrics::default());
         assert!(dto.fans.is_empty());
+    }
+
+    #[test]
+    fn thermal_level_defaults_to_nominal_and_is_settable() {
+        // `From` leaves the field at its nominal placeholder; the worker
+        // overwrites it with the live OS level.
+        let mut dto = NativeMetrics::from(&macmon::Metrics::default());
+        assert_eq!(dto.thermal_pressure_level, 0.0);
+
+        dto.thermal_pressure_level = crate::thermal::thermal_pressure_level();
+        assert!(
+            (0.0..=3.0).contains(&dto.thermal_pressure_level),
+            "thermal level out of range: {}",
+            dto.thermal_pressure_level
+        );
     }
 
     #[test]

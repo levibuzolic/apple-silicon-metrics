@@ -33,9 +33,11 @@ const SOC: NativeSocInfo = {
 function nativeMetrics(overrides: Partial<NativeMetrics> = {}): NativeMetrics {
   return {
     cpuUsageRatio: 0.25,
+    cpuActiveRatio: 0.2,
     cpuPowerWatts: 3,
     cpuTempCelsius: 55,
     gpuUsageRatio: 0.4,
+    gpuActiveRatio: 0.35,
     gpuFreqMhz: 1200,
     gpuPowerWatts: 5,
     gpuTempCelsius: 0,
@@ -46,6 +48,7 @@ function nativeMetrics(overrides: Partial<NativeMetrics> = {}): NativeMetrics {
     ramPowerWatts: 0,
     anePowerWatts: 0,
     fans: [],
+    thermalPressureLevel: 0,
     ...overrides,
   };
 }
@@ -116,8 +119,11 @@ describe("toMetrics", () => {
     });
 
     expect(m.cpu.usageRatio).toBe(0.25);
+    expect(m.cpu.activeRatio).toBe(0.2);
     expect(m.cpu.powerWatts).toBe(3);
     expect(m.cpu.tempCelsius).toBe(55);
+    expect(m.gpu.usageRatio).toBe(0.4);
+    expect(m.gpu.activeRatio).toBe(0.35);
     expect(m.gpu.frequencyMhz).toBe(1200);
     expect(m.memory.ramTotalBytes).toBe(51_539_607_552);
     expect(m.soc?.chipName).toBe("Apple M4 Pro");
@@ -164,6 +170,22 @@ describe("toMetrics", () => {
   it("emits an empty fans array on fanless Macs", () => {
     const m = toMetrics(nativeMetrics({ fans: [] }), SOC);
     expect(m.fans).toEqual([]);
+  });
+
+  it("maps thermal level 0 to nominal with throttling off", () => {
+    const m = toMetrics(nativeMetrics({ thermalPressureLevel: 0 }), SOC);
+    expect(m.thermal).toEqual({ level: 0, state: "nominal", throttling: false });
+  });
+
+  it("maps thermal level 2 to serious with throttling on", () => {
+    const m = toMetrics(nativeMetrics({ thermalPressureLevel: 2 }), SOC);
+    expect(m.thermal).toEqual({ level: 2, state: "serious", throttling: true });
+  });
+
+  it("clamps an unknown thermal level to nominal (throttling still reflects the raw level)", () => {
+    const m = toMetrics(nativeMetrics({ thermalPressureLevel: 9 }), SOC);
+    expect(m.thermal?.state).toBe("nominal");
+    expect(m.thermal?.level).toBe(9);
   });
 });
 

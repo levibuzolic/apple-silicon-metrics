@@ -19,12 +19,16 @@ export interface SocInfo {
 export interface CpuMetrics {
   /** Combined E+P core utilization, weighted by core count. `0..1`. */
   usageRatio: number | null;
+  /** Active residency ratio (not frequency-scaled), 0..1. */
+  activeRatio: number | null;
   powerWatts: number | null;
   tempCelsius: number | null;
 }
 
 export interface GpuMetrics {
   usageRatio: number | null;
+  /** Active residency ratio (not frequency-scaled), 0..1. */
+  activeRatio: number | null;
   frequencyMhz: number | null;
   powerWatts: number | null;
   tempCelsius: number | null;
@@ -40,6 +44,21 @@ export interface MemoryMetrics {
 
 export interface AneMetrics {
   powerWatts: number | null;
+}
+
+/**
+ * Coarse OS-level thermal-*pressure* signal, read from
+ * `NSProcessInfo.thermalState`. This is the system-wide throttling hint macOS
+ * exposes to apps — *not* an IOReport hardware temperature/counter. It only ever
+ * takes four discrete levels.
+ */
+export interface ThermalMetrics {
+  /** Raw level: 0 nominal, 1 fair, 2 serious, 3 critical. */
+  level: number;
+  /** Human-readable name for {@link ThermalMetrics.level}. */
+  state: "nominal" | "fair" | "serious" | "critical";
+  /** `true` when the OS has begun throttling to shed heat (level `>= 1`). */
+  throttling: boolean;
 }
 
 export interface FanMetrics {
@@ -61,6 +80,8 @@ export interface Metrics {
   ane?: AneMetrics;
   /** Per-fan speeds. Empty on fanless Macs (e.g. MacBook Air). */
   fans?: FanMetrics[];
+  /** Coarse OS thermal-pressure / throttling state. */
+  thermal?: ThermalMetrics;
 }
 
 export interface SampleOptions {

@@ -82,7 +82,14 @@ fn run(cmd_rx: Receiver<Cmd>, init_tx: Sender<Result<NativeSocInfo, String>>) {
             Cmd::Sample { duration_ms, resp } => {
                 let result = sampler
                     .get_metrics(duration_ms)
-                    .map(|m| NativeMetrics::from(&m))
+                    .map(|m| {
+                        let mut dto = NativeMetrics::from(&m);
+                        // Not carried by `macmon::Metrics`; read the live OS
+                        // thermal-pressure level here on the worker thread.
+                        dto.thermal_pressure_level =
+                            crate::thermal::thermal_pressure_level();
+                        dto
+                    })
                     .map_err(|e| format!("{e}"));
                 let _ = resp.send(result);
             }
