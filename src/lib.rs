@@ -9,7 +9,6 @@
 extern crate napi_derive;
 
 mod dto;
-mod membw;
 mod thermal;
 mod worker;
 

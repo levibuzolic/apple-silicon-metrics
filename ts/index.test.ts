@@ -46,8 +46,6 @@ function nativeMetrics(overrides: Partial<NativeMetrics> = {}): NativeMetrics {
     swapTotalBytes: 0,
     swapUsedBytes: 0,
     ramPowerWatts: 0,
-    memReadBandwidthGbps: 0,
-    memWriteBandwidthGbps: 0,
     anePowerWatts: 0,
     fans: [],
     thermalPressureLevel: 0,
@@ -131,24 +129,6 @@ describe("toMetrics", () => {
     expect(m.soc?.chipName).toBe("Apple M4 Pro");
     expect(typeof m.timestamp).toBe("string");
     expect(Number.isNaN(Date.parse(m.timestamp))).toBe(false);
-  });
-
-  it("maps DRAM bandwidth, passing positive GB/s through", () => {
-    const m = toMetrics(
-      nativeMetrics({ memReadBandwidthGbps: 42.5, memWriteBandwidthGbps: 17.25 }),
-      SOC,
-    );
-    expect(m.memory.readBandwidthGbps).toBe(42.5);
-    expect(m.memory.writeBandwidthGbps).toBe(17.25);
-  });
-
-  it("normalizes unavailable bandwidth (<= 0) to null", () => {
-    const m = toMetrics(
-      nativeMetrics({ memReadBandwidthGbps: 0, memWriteBandwidthGbps: 0 }),
-      SOC,
-    );
-    expect(m.memory.readBandwidthGbps).toBeNull();
-    expect(m.memory.writeBandwidthGbps).toBeNull();
   });
 
   it("normalizes unavailable sensors (<= 0) to null", () => {

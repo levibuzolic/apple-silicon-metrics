@@ -52,12 +52,6 @@ pub struct NativeMetrics {
     pub swap_total_bytes: f64,
     pub swap_used_bytes: f64,
     pub ram_power_watts: f64,
-    // DRAM bandwidth over the sample window (GB/s). Not sourced from
-    // `macmon::Metrics`; the worker sets these from its own IOReport reader
-    // (see `crate::membw`) and leaves them at 0.0 when the SoC does not expose
-    // (or cannot sudo-lessly sample) the channels.
-    pub mem_read_bandwidth_gbps: f64,
-    pub mem_write_bandwidth_gbps: f64,
     // ANE
     pub ane_power_watts: f64,
     // Fans (empty when none are reported)
@@ -98,9 +92,6 @@ impl From<&macmon::Metrics> for NativeMetrics {
             swap_total_bytes: m.memory.swap_total as f64,
             swap_used_bytes: m.memory.swap_usage as f64,
             ram_power_watts: m.ram_power as f64,
-            // Populated by the worker after construction; not `macmon` fields.
-            mem_read_bandwidth_gbps: 0.0,
-            mem_write_bandwidth_gbps: 0.0,
             ane_power_watts: m.ane_power as f64,
             fans: m.fans.iter().map(NativeFan::from).collect(),
             // Placeholder; the worker overwrites this with the live OS thermal
@@ -192,20 +183,6 @@ mod tests {
             "thermal level out of range: {}",
             dto.thermal_pressure_level
         );
-    }
-
-    #[test]
-    fn bandwidth_defaults_to_zero_and_is_worker_populated() {
-        // Bandwidth is not a `macmon::Metrics` field; `From` leaves it at 0.0
-        // and the worker overwrites it. Fabricate a post-population sample.
-        let mut dto = NativeMetrics::from(&sample_metrics());
-        assert_eq!(dto.mem_read_bandwidth_gbps, 0.0);
-        assert_eq!(dto.mem_write_bandwidth_gbps, 0.0);
-
-        dto.mem_read_bandwidth_gbps = 42.5;
-        dto.mem_write_bandwidth_gbps = 17.25;
-        assert_eq!(dto.mem_read_bandwidth_gbps, 42.5);
-        assert_eq!(dto.mem_write_bandwidth_gbps, 17.25);
     }
 
     #[test]
