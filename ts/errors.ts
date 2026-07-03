@@ -1,5 +1,5 @@
-/** Stable, machine-checkable error codes surfaced by `asmon`. */
-export type AsmonErrorCode =
+/** Stable, machine-checkable error codes surfaced by `apple-silicon-metrics`. */
+export type AppleSiliconMetricsErrorCode =
   | "UNSUPPORTED_PLATFORM"
   | "UNSUPPORTED_ARCH"
   | "SAMPLER_INIT_FAILED"
@@ -7,15 +7,15 @@ export type AsmonErrorCode =
   | "SAMPLER_CLOSED";
 
 /**
- * Error thrown by `asmon` for all expected failure modes. Inspect
- * {@link AsmonError.code} rather than matching on the message.
+ * Error thrown by `apple-silicon-metrics` for all expected failure modes. Inspect
+ * {@link AppleSiliconMetricsError.code} rather than matching on the message.
  */
-export class AsmonError extends Error {
-  readonly code: AsmonErrorCode;
+export class AppleSiliconMetricsError extends Error {
+  readonly code: AppleSiliconMetricsErrorCode;
 
-  constructor(code: AsmonErrorCode, message: string, options?: ErrorOptions) {
+  constructor(code: AppleSiliconMetricsErrorCode, message: string, options?: ErrorOptions) {
     super(message, options);
-    this.name = "AsmonError";
+    this.name = "AppleSiliconMetricsError";
     this.code = code;
     // Preserve prototype chain when compiled to older targets.
     Object.setPrototypeOf(this, new.target.prototype);
@@ -23,6 +23,6 @@ export class AsmonError extends Error {
 }
 
 /** Narrowing helper for consumers who prefer a guard over `instanceof`. */
-export function isAsmonError(value: unknown): value is AsmonError {
-  return value instanceof AsmonError;
+export function isAppleSiliconMetricsError(value: unknown): value is AppleSiliconMetricsError {
+  return value instanceof AppleSiliconMetricsError;
 }

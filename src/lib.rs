@@ -1,4 +1,4 @@
-//! N-API bindings for `asmon`.
+//! N-API bindings for `apple-silicon-metrics`.
 //!
 //! This crate only ever builds for `darwin-arm64` (enforced by the npm package
 //! `os`/`cpu` fields and by CI). The ergonomic, unit-normalized public API and

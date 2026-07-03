@@ -2,7 +2,7 @@
  * Lazy, format-agnostic loader for the generated N-API binding.
  *
  * The native addon is required on first use (never at module-eval time) so that
- * platform/arch gating in `index.ts` can throw typed {@link AsmonError}s instead
+ * platform/arch gating in `index.ts` can throw typed {@link AppleSiliconMetricsError}s instead
  * of a raw module-resolution failure. `createRequire` keeps this working from
  * both the ESM (`dist/index.mjs`) and CJS (`dist/index.cjs`) builds.
  */

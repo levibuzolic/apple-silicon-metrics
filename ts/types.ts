@@ -1,5 +1,5 @@
 /**
- * Public, unit-normalized types for `asmon`.
+ * Public, unit-normalized types for `apple-silicon-metrics`.
  *
  * Units: ratios `0..1`, temperatures °C, power W, frequency MHz, memory bytes,
  * `timestamp` as an ISO-8601 string. A `null` value means the metric exists in

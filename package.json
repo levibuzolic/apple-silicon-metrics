@@ -1,5 +1,5 @@
 {
-  "name": "asmon",
+  "name": "apple-silicon-metrics",
   "version": "0.1.0",
   "description": "Sudo-less Apple Silicon hardware metrics (CPU/GPU/RAM, temperature, power) for Node & TypeScript, backed by the Rust macmon crate.",
   "type": "module",
@@ -63,7 +63,7 @@
     "access": "public"
   },
   "napi": {
-    "binaryName": "asmon",
+    "binaryName": "apple-silicon-metrics",
     "targets": [
       "aarch64-apple-darwin"
     ]

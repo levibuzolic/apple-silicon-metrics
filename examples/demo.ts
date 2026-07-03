@@ -4,10 +4,10 @@
  *   pnpm demo            # one snapshot
  *   pnpm demo --watch    # refresh every second until Ctrl-C
  *
- * Run directly with modern Node (type-stripping); imports `asmon` by name via
+ * Run directly with modern Node (type-stripping); imports `apple-silicon-metrics` by name via
  * package self-reference, so it exercises the real published entry points.
  */
-import { createSampler, isSupported, type Metrics } from "asmon";
+import { createSampler, isSupported, type Metrics } from "apple-silicon-metrics";
 
 function ratio(value: number | null): string {
   return value === null ? "  —  " : `${(value * 100).toFixed(1).padStart(4)}%`;
@@ -39,7 +39,7 @@ function render(m: Metrics): string {
 async function main(): Promise<void> {
   if (!isSupported()) {
     console.error(
-      `asmon requires macOS on Apple Silicon (this is ${process.platform}/${process.arch}).`,
+      `apple-silicon-metrics requires macOS on Apple Silicon (this is ${process.platform}/${process.arch}).`,
     );
     process.exitCode = 1;
     return;

@@ -38,7 +38,7 @@ impl WorkerHandle {
         let (init_tx, init_rx) = channel::<Result<NativeSocInfo, String>>();
 
         std::thread::Builder::new()
-            .name("asmon-sampler".into())
+            .name("apple-silicon-metrics-sampler".into())
             .spawn(move || run(cmd_rx, init_tx))
             .map_err(|e| format!("failed to spawn sampler thread: {e}"))?;
 

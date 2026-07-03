@@ -1,9 +1,9 @@
 /**
- * `asmon` — sudo-less Apple Silicon hardware metrics for Node & TypeScript.
+ * `apple-silicon-metrics` — sudo-less Apple Silicon hardware metrics for Node & TypeScript.
  *
  * @example
  * ```ts
- * import { createSampler, isSupported } from "asmon";
+ * import { createSampler, isSupported } from "apple-silicon-metrics";
  *
  * if (isSupported()) {
  *   const sampler = createSampler({ intervalMs: 1000 });
@@ -20,7 +20,7 @@ import {
   type NativeSamplerHandle,
   type NativeSocInfo,
 } from "./binding.js";
-import { AsmonError } from "./errors.js";
+import { AppleSiliconMetricsError } from "./errors.js";
 import type {
   Metrics,
   SampleOptions,
@@ -41,29 +41,29 @@ export type {
   SamplerOptions,
   SocInfo,
 } from "./types.js";
-export { AsmonError, isAsmonError, type AsmonErrorCode } from "./errors.js";
+export { AppleSiliconMetricsError, isAppleSiliconMetricsError, type AppleSiliconMetricsErrorCode } from "./errors.js";
 
 /** Default sample window (ms) used by {@link Sampler.sampleNow}. */
 const DEFAULT_INTERVAL_MS = 1000;
 /** Short window (ms) used by {@link Sampler.prime} to warm the delta baseline. */
 const PRIME_INTERVAL_MS = 50;
 
-/** Whether the current process can run `asmon` (macOS on Apple Silicon). */
+/** Whether the current process can run `apple-silicon-metrics` (macOS on Apple Silicon). */
 export function isSupported(): boolean {
   return process.platform === "darwin" && process.arch === "arm64";
 }
 
 function assertSupported(): void {
   if (process.platform !== "darwin") {
-    throw new AsmonError(
+    throw new AppleSiliconMetricsError(
       "UNSUPPORTED_PLATFORM",
-      `asmon requires macOS; current platform is "${process.platform}".`,
+      `apple-silicon-metrics requires macOS; current platform is "${process.platform}".`,
     );
   }
   if (process.arch !== "arm64") {
-    throw new AsmonError(
+    throw new AppleSiliconMetricsError(
       "UNSUPPORTED_ARCH",
-      `asmon requires Apple Silicon (arm64); current architecture is "${process.arch}".`,
+      `apple-silicon-metrics requires Apple Silicon (arm64); current architecture is "${process.arch}".`,
     );
   }
 }
@@ -146,7 +146,7 @@ class SamplerImpl implements Sampler {
 
   #open(): NativeSamplerHandle {
     if (this.#handle === null) {
-      throw new AsmonError("SAMPLER_CLOSED", "sampler has been closed.");
+      throw new AppleSiliconMetricsError("SAMPLER_CLOSED", "sampler has been closed.");
     }
     return this.#handle;
   }
@@ -157,7 +157,7 @@ class SamplerImpl implements Sampler {
     try {
       native = await handle.sample(durationMs);
     } catch (error) {
-      throw new AsmonError(
+      throw new AppleSiliconMetricsError(
         "SENSOR_UNAVAILABLE",
         `failed to read metrics: ${messageOf(error)}`,
         { cause: error },
@@ -190,7 +190,7 @@ function initSampler(binding: NativeBinding): NativeSamplerHandle {
   try {
     return new binding.Sampler();
   } catch (error) {
-    throw new AsmonError(
+    throw new AppleSiliconMetricsError(
       "SAMPLER_INIT_FAILED",
       `failed to initialize Apple Silicon sensors: ${messageOf(error)}`,
       { cause: error },

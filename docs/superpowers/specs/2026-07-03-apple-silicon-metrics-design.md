@@ -1,12 +1,12 @@
-# asmon — Apple Silicon Monitor — Design
+# apple-silicon-metrics — Apple Silicon Monitor — Design
 
 **Date:** 2026-07-03
 **Status:** Approved for implementation
-**Package name:** `asmon` (npm), Rust crate `asmon`
+**Package name:** `apple-silicon-metrics` (npm), Rust crate `apple-silicon-metrics`
 
 ## Summary
 
-`asmon` is a native-backed Node/TypeScript package that exposes Apple Silicon
+`apple-silicon-metrics` is a native-backed Node/TypeScript package that exposes Apple Silicon
 hardware metrics (CPU/GPU power, usage, frequency, temperature, RAM/swap, ANE
 power, SoC info) without `sudo`, by wrapping the Rust [`macmon`](https://crates.io/crates/macmon)
 crate through [`napi-rs`](https://napi.rs) v3.
@@ -40,7 +40,7 @@ Three layers, each independently testable:
 ┌─────────────────────────────────────────────────────────┐
 │ ts/index.ts  — public API (ESM + CJS + .d.ts via tsdown) │
 │   isSupported() · sampleOnce() · createSampler()         │
-│   AsmonError + typed codes · unit normalization + null   │
+│   AppleSiliconMetricsError + typed codes · unit normalization + null   │
 └───────────────▲─────────────────────────────────────────┘
                 │ imports generated binding (external)
 ┌───────────────┴─────────────────────────────────────────┐
@@ -125,7 +125,7 @@ interface Sampler {
 
 ### Typed errors
 
-`class AsmonError extends Error { code: AsmonErrorCode }` where `AsmonErrorCode`
+`class AppleSiliconMetricsError extends Error { code: AppleSiliconMetricsErrorCode }` where `AppleSiliconMetricsErrorCode`
 is a string-literal union: `UNSUPPORTED_PLATFORM` | `UNSUPPORTED_ARCH` |
 `SAMPLER_INIT_FAILED` | `SENSOR_UNAVAILABLE` | `SAMPLER_CLOSED`. Platform/arch
 checks run in JS **before** loading the native addon, so unsupported hosts get a
@@ -134,7 +134,7 @@ clean typed error instead of a raw "module not found".
 ## Packaging & publishing
 
 - Single package, `"os": ["darwin"]`, `"cpu": ["arm64"]`.
-- `napi-rs` builds `asmon.darwin-arm64.node` + generates a CJS binding loader.
+- `napi-rs` builds `apple-silicon-metrics.darwin-arm64.node` + generates a CJS binding loader.
 - `tsdown` builds the wrapper to dual **ESM (`index.js`) + CJS (`index.cjs`) +
   `index.d.ts`**, with the native binding marked external.
 - `exports` map wires `types` / `import` / `require`. Supports TS consumers

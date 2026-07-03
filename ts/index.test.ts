@@ -11,9 +11,9 @@ vi.mock("./binding.js", () => ({ loadNative: vi.fn() }));
 
 import { loadNative } from "./binding.js";
 import {
-  AsmonError,
+  AppleSiliconMetricsError,
   createSampler,
-  isAsmonError,
+  isAppleSiliconMetricsError,
   isSupported,
   sampleOnce,
   toMetrics,
@@ -179,8 +179,8 @@ describe("createSampler platform gating", () => {
         createSampler();
         expect.unreachable();
       } catch (error) {
-        expect(isAsmonError(error)).toBe(true);
-        expect((error as AsmonError).code).toBe("UNSUPPORTED_ARCH");
+        expect(isAppleSiliconMetricsError(error)).toBe(true);
+        expect((error as AppleSiliconMetricsError).code).toBe("UNSUPPORTED_ARCH");
       }
     });
   });

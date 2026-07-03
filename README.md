@@ -1,10 +1,9 @@
-# asmon
+# apple-silicon-metrics
 
-**A**pple **S**ilicon **Mon**itor — sudo-less Apple Silicon hardware metrics for
-Node.js & TypeScript. Native N-API bindings around the Rust
-[`macmon`](https://crates.io/crates/macmon) crate: GPU utilization / frequency /
-power, CPU usage / power, RAM & swap, CPU/GPU temperature, and ANE power — no
-`sudo`, no spawning subprocesses.
+Sudo-less Apple Silicon hardware metrics for Node.js & TypeScript. Native N-API
+bindings around the Rust [`macmon`](https://crates.io/crates/macmon) crate: GPU
+utilization / frequency / power, CPU usage / power, RAM & swap, CPU/GPU
+temperature, and ANE power — no `sudo`, no spawning subprocesses.
 
 > **Platform:** macOS on Apple Silicon (`darwin-arm64`) only. Every other
 > platform throws a typed error rather than returning fake data.
@@ -12,8 +11,8 @@ power, CPU usage / power, RAM & swap, CPU/GPU temperature, and ANE power — no
 ## Install
 
 ```sh
-pnpm add asmon
-# or: npm i asmon / yarn add asmon
+pnpm add apple-silicon-metrics
+# or: npm i apple-silicon-metrics / yarn add apple-silicon-metrics
 ```
 
 The package ships a prebuilt `darwin-arm64` binary and is marked
@@ -25,7 +24,7 @@ unsupported hosts.
 Works from TypeScript, ESM JavaScript, and CommonJS JavaScript out of the box.
 
 ```ts
-import { createSampler, sampleOnce, isSupported } from "asmon";
+import { createSampler, sampleOnce, isSupported } from "apple-silicon-metrics";
 
 if (!isSupported()) throw new Error("Requires macOS on Apple Silicon");
 
@@ -44,7 +43,7 @@ sampler.close();                 // release the worker thread when done
 CommonJS:
 
 ```js
-const { sampleOnce } = require("asmon");
+const { sampleOnce } = require("apple-silicon-metrics");
 sampleOnce({ intervalMs: 500 }).then(console.log);
 ```
 
@@ -95,9 +94,9 @@ Ratios `0..1` · temperatures °C · power W · frequency MHz · memory bytes ·
 `timestamp` ISO-8601. A `null` value means the metric exists but its sensor was
 unavailable on this machine/OS.
 
-### Errors — `AsmonError`
+### Errors — `AppleSiliconMetricsError`
 
-All expected failures throw an `AsmonError` with a stable `.code`:
+All expected failures throw an `AppleSiliconMetricsError` with a stable `.code`:
 
 | code | when |
 | --- | --- |
@@ -108,11 +107,11 @@ All expected failures throw an `AsmonError` with a stable `.code`:
 | `SAMPLER_CLOSED` | used after `close()` |
 
 ```ts
-import { isAsmonError } from "asmon";
+import { isAppleSiliconMetricsError } from "apple-silicon-metrics";
 try {
   await sampleOnce();
 } catch (err) {
-  if (isAsmonError(err) && err.code === "SAMPLER_INIT_FAILED") { /* ... */ }
+  if (isAppleSiliconMetricsError(err) && err.code === "SAMPLER_INIT_FAILED") { /* ... */ }
 }
 ```
 
@@ -121,9 +120,9 @@ try {
 `macmon`'s metrics come from private macOS APIs (IOReport, AppleSMC, IOHID) and
 are **delta-based**, so a long-lived sampler is more accurate than repeated
 one-shots. Because `macmon::Sampler` owns raw CoreFoundation pointers and is not
-thread-safe, `asmon` pins it to a single dedicated OS thread and drives it over
-channels. Each `sample()` runs the blocking read on libuv's threadpool, so
-Node's event loop is never blocked while the sample window elapses.
+thread-safe, `apple-silicon-metrics` pins it to a single dedicated OS thread and
+drives it over channels. Each `sample()` runs the blocking read on libuv's
+threadpool, so Node's event loop is never blocked while the sample window elapses.
 
 ## Building from source
 
@@ -163,7 +162,7 @@ pnpm run build                # produce dist/ + native/*.node
 npm publish                   # unscoped → public by default
 ```
 
-Then, on npmjs.com → **asmon → Settings → Trusted Publisher**, add:
+Then, on npmjs.com → **apple-silicon-metrics → Settings → Trusted Publisher**, add:
 
 - Provider: **GitHub Actions**
 - Organization/user: `levibuzolic`, Repository: `asmon`
