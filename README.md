@@ -2,8 +2,9 @@
 
 Sudo-less Apple Silicon hardware metrics for Node.js & TypeScript. Native N-API
 bindings around the Rust [`macmon`](https://crates.io/crates/macmon) crate: GPU
-utilization / frequency / power, CPU usage / power, RAM & swap, CPU/GPU
-temperature, fan RPM, and ANE power — no `sudo`, no spawning subprocesses.
+utilization / frequency / power, CPU usage & active residency / power, RAM &
+swap, CPU/GPU temperature, fan RPM, ANE power, and OS thermal-pressure state —
+no `sudo`, no spawning subprocesses.
 
 > **Platform:** macOS on Apple Silicon (`darwin-arm64`) only. Every other
 > platform throws a typed error rather than returning fake data.
@@ -60,11 +61,12 @@ sampleOnce({ intervalMs: 500 }).then(console.log);
     "ecpuCores": 4,
     "pcpuCores": 10
   },
-  "cpu": { "usageRatio": 0.24, "powerWatts": 3.16, "tempCelsius": 61.3 },
-  "gpu": { "usageRatio": 1, "frequencyMhz": 1578, "powerWatts": 34.49, "tempCelsius": 87.1 },
+  "cpu": { "usageRatio": 0.24, "activeRatio": 0.18, "powerWatts": 3.16, "tempCelsius": 61.3 },
+  "gpu": { "usageRatio": 1, "activeRatio": 0.97, "frequencyMhz": 1578, "powerWatts": 34.49, "tempCelsius": 87.1 },
   "memory": { "ramTotalBytes": 51539607552, "ramUsedBytes": 41494380544, "swapTotalBytes": 10737418240, "swapUsedBytes": 9884270592, "ramPowerWatts": 2.66 },
   "ane": { "powerWatts": null },
-  "fans": [{ "name": "fan0", "rpm": 1980, "maxRpm": 7826 }, { "name": "fan1", "rpm": 2010, "maxRpm": 7826 }]
+  "fans": [{ "name": "fan0", "rpm": 1980, "maxRpm": 7826 }, { "name": "fan1", "rpm": 2010, "maxRpm": 7826 }],
+  "thermal": { "level": 0, "state": "nominal", "throttling": false }
 }
 ```
 
@@ -81,11 +83,12 @@ npx apple-silicon-metrics --json       # machine-readable (NDJSON when watching)
 
 ```
 Apple M4 Pro  ·  Mac16,8  ·  48 GB  ·  20 GPU cores  ·  4E+10P
-  CPU   usage 16.7%   power 1.9 W   temp 58.5°C
-  GPU   usage 12.4%   power 0.7 W   temp 41.5°C   freq 398 MHz
+  CPU   usage 16.7%   active 12.4%   power 1.9 W   temp 58.5°C
+  GPU   usage 12.4%   active  9.1%   power 0.7 W   temp 41.5°C   freq 398 MHz
   RAM   17.5 GiB / 48.0 GiB   swap 2.6 GiB / 4.0 GiB   power 0.9 W
   ANE   power —
   FAN   fan0 1980/7826 rpm   fan1 2010/7826 rpm
+  THRM  nominal
   2026-07-03T05:37:34.386Z
 ```
 
@@ -117,6 +120,11 @@ Create a long-lived sampler backed by a dedicated worker thread.
 Ratios `0..1` · temperatures °C · power W · frequency MHz · memory bytes ·
 `timestamp` ISO-8601. A `null` value means the metric exists but its sensor was
 unavailable on this machine/OS.
+
+`usageRatio` is frequency-scaled effective usage; `activeRatio` is raw active
+residency (not frequency-scaled). `thermal` is the coarse OS-level
+thermal-*pressure* signal from `NSProcessInfo.thermalState` (`level` 0–3,
+`throttling` = `level >= 1`) — a system throttling hint, not a hardware sensor.
 
 ### Errors — `AppleSiliconMetricsError`
 
