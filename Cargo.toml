@@ -1,0 +1,23 @@
+[package]
+name = "asmon"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Native N-API bindings exposing Apple Silicon hardware metrics via the macmon crate"
+repository = "https://github.com/levibuzolic/asmon"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+napi = { version = "3", features = ["napi8"] }
+napi-derive = "3"
+macmon = "0.7.0"
+
+[build-dependencies]
+napi-build = "2"
+
+[profile.release]
+lto = true
+strip = "symbols"
