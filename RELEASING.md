@@ -44,3 +44,12 @@ Finally, in GitHub → **Settings → Environments → `Publish`**, add yourself
 
 Requirements (enforced by the workflow): npm ≥ 11.15.0, Node ≥ 22.14.0,
 GitHub-hosted runners only.
+
+## Dependency caveat: git-pinned `macmon`
+
+`Cargo.toml` pins `macmon` to a specific git rev rather than a crates.io
+release, because fan-RPM support (`Metrics.fans`) has not shipped in a published
+version yet (0.7.0 is the latest on crates.io). The prebuilt `darwin-arm64`
+binary bundled in each npm release is therefore compiled against that pinned
+rev. When `macmon` publishes a release that includes fans, switch the dependency
+back to a version requirement and drop the pin.
