@@ -78,7 +78,7 @@ jobs:
           npm pack --dry-run --json > ../base.json
 
       - name: Render size comment
-        run: node head/ts/pkg-size.ts base.json head.json > comment.md
+        run: node head/scripts/pkg-size.ts base.json head.json > comment.md
 
       - name: Upsert sticky comment
         uses: actions/github-script@v7
