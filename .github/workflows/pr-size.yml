@@ -38,6 +38,10 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v6
+        with:
+          # Both checkouts are in subdirs, so there's no root package.json to read
+          # the pinned `packageManager` version from — point at the head checkout.
+          package_json_file: head/package.json
 
       - name: Set up Node
         uses: actions/setup-node@v6
