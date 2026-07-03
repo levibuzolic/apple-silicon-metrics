@@ -22,10 +22,10 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # Pinned to latest for reproducible, provenance-attested release builds.
+  # Latest within each major line (setup-node / `npm@11` resolve the newest).
   # Floors: trusted publishing needs Node >= 22.14; `npm stage` needs npm >= 11.15.
-  NODE_VERSION: "26.4.0"
-  NPM_VERSION: "11.18.0"
+  NODE_VERSION: "26"
+  NPM_VERSION: "11"
 
 jobs:
   test:
