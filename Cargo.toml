@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 license = "MIT"
 description = "Native N-API bindings exposing Apple Silicon hardware metrics via the macmon crate"
-repository = "https://github.com/levibuzolic/asmon"
+repository = "https://github.com/levibuzolic/apple-silicon-metrics"
 publish = false
 
 [lib]

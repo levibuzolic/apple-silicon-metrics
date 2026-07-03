@@ -7,10 +7,10 @@
   "author": "levibuzolic",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/levibuzolic/asmon.git"
+    "url": "git+https://github.com/levibuzolic/apple-silicon-metrics.git"
   },
-  "homepage": "https://github.com/levibuzolic/asmon#readme",
-  "bugs": "https://github.com/levibuzolic/asmon/issues",
+  "homepage": "https://github.com/levibuzolic/apple-silicon-metrics#readme",
+  "bugs": "https://github.com/levibuzolic/apple-silicon-metrics/issues",
   "keywords": [
     "apple-silicon",
     "macmon",
@@ -52,6 +52,9 @@
       }
     },
     "./package.json": "./package.json"
+  },
+  "bin": {
+    "apple-silicon-metrics": "./dist/cli.mjs"
   },
   "files": [
     "dist",

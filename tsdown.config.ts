@@ -1,7 +1,7 @@
 import { defineConfig } from "tsdown";
 
 export default defineConfig({
-  entry: ["ts/index.ts"],
+  entry: ["ts/index.ts", "ts/cli.ts"],
   format: ["esm", "cjs"],
   // Emit .d.ts (ESM) and .d.cts (CJS) so both `import` and `require` type-resolve.
   dts: true,

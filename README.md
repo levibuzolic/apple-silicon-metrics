@@ -67,6 +67,28 @@ sampleOnce({ intervalMs: 500 }).then(console.log);
 }
 ```
 
+## CLI
+
+The package ships a small `apple-silicon-metrics` binary:
+
+```sh
+npx apple-silicon-metrics              # one formatted snapshot
+npx apple-silicon-metrics --watch      # refresh every second until Ctrl-C
+npx apple-silicon-metrics -i 500       # set the sample window (ms)
+npx apple-silicon-metrics --json       # machine-readable (NDJSON when watching)
+```
+
+```
+Apple M4 Pro  ·  Mac16,8  ·  48 GB  ·  20 GPU cores  ·  4E+10P
+  CPU   usage 16.7%   power 1.9 W   temp 58.5°C
+  GPU   usage 12.4%   power 0.7 W   temp 41.5°C   freq 398 MHz
+  RAM   17.5 GiB / 48.0 GiB   swap 2.6 GiB / 4.0 GiB   power 0.9 W
+  ANE   power —
+  2026-07-03T05:37:34.386Z
+```
+
+Flags: `-w/--watch`, `-i/--interval <ms>`, `-j/--json`, `-h/--help`, `-v/--version`.
+
 ## API
 
 ### `isSupported(): boolean`
@@ -165,7 +187,7 @@ npm publish                   # unscoped → public by default
 Then, on npmjs.com → **apple-silicon-metrics → Settings → Trusted Publisher**, add:
 
 - Provider: **GitHub Actions**
-- Organization/user: `levibuzolic`, Repository: `asmon`
+- Organization/user: `levibuzolic`, Repository: `apple-silicon-metrics`
 - Workflow filename: `publish.yml`
 - Environment: `Publish`
 - Allowed action: **`npm stage publish`**
